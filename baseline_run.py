@@ -3,7 +3,6 @@ import time    #记录训练时间
 import gc     #进行垃圾回收，释放 CUDA 内存
 from datetime import datetime      #记录训练时间
 from os import makedirs   #用于创建目录
-
 import torch   #负责深度学习模型的训练和保存
 
 from eval_run import eval_and_save_metrics   #用于计算和保存模型评估指标
@@ -46,9 +45,7 @@ def create_generic_task(task_name):
     return generic_task(task_name, train_batch_size=config["batch_size"], max_docs=MAX_DOCS)
 
 # ADAPT: Uncomment the task that has to be trained and comment all other tasks out
-
-# ADAPT: Uncomment the task that has to be trained and comment all other tasks out
-task = create_task(pubmed_task)    #这里选择了 pubmed_task 作为训练数据集（即 PubMed 论文分类任务）
+task = create_task(pubmed_task)   
 #task = create_task(pubmed_task_small)
 #task = create_task(nicta_task)
 #task = create_task(dri_task)
@@ -60,15 +57,15 @@ task = create_task(pubmed_task)    #这里选择了 pubmed_task 作为训练数�
 # task = create_generic_task(GEN_ART_TASK)
 
 # ADAPT: Set to False if you do not want to save the best model
-save_best_models = True     #是否保存训练过程中表现最好的模型
+save_best_models = True  
 
 # ADAPT: provide a different device if needed
-device = get_device(0)   #使用 get_device(0) 选择计算设备（可能是 GPU 或 CPU）
+device = get_device(0)   
 
 timestamp = datetime.now().strftime("%Y-%m-%d_%H_%M_%S")   #生成当前时间的字符串（格式 YYYY-MM-DD_HH_MM_SS）
 
 # ADAPT: adapt the folder name of the run if necessary
-run = f"{timestamp}_{task.task_name}_baseline"    #作为本次实验的唯一标识
+run = f"{timestamp}_{task.task_name}_baseline"   
 
 # -------------------------------------------
 
@@ -78,7 +75,7 @@ run_results = f'results/{run}'    #设定保存训练结果的目录
 makedirs(run_results, exist_ok=False)
 
 # preload data if not already done
-task.get_folds()    #预加载数据集，并划分为 K 折交叉验证 的多个子集
+task.get_folds()   
 
 restarts = 1 if task.num_folds == 1 else 1
 for restart in range(restarts):
@@ -96,12 +93,12 @@ for restart in range(restarts):
             torch.save(best_model.state_dict(), model_path)
 
         result_writer.log(f"finished training {restart} for fold {fold_num}: {time.time() - start}")
-        #计算训练所需时间
+    
         # explicitly call garbage collector so that CUDA memory is released
         gc.collect()
 
 log("Training finished.")
 
 log("Calculating metrics...")
-eval_and_save_metrics(run_results)   #计算并保存评估指标
+eval_and_save_metrics(run_results)   
 log("Calculating metrics finished")
